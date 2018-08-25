@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>水球</title>
+    <style>
+        canvas{
+            display: block;
+            margin: 50px auto;
+            border-radius: 50%;
+            border: 1px solid #bbb;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        function Curve({ctxId,num,index,width,height,speed,direction=1,color,A=1,B=1,C=0}){
+            this.num = num
+            this.ctxId= ctxId
+            this.width = width
+            this.height = height
+            this.index = index
+            this.speed =speed
+            this.direction = direction
+            this.A= A
+            this.B=B
+            this.C=C
+            this.color =color
+            this.create()
+            this.render()
+            this.update()
+        }
+        
+        Curve.prototype.create = function(){
+            let canvas = document.getElementById(this.ctxId)
+            if(!canvas){
+                canvas = document.createElement('canvas')
+                canvas.id = this.ctxId
+                canvas.width = this.width
+                canvas.height = this.height
+                document.body.appendChild(canvas)
+            }
+            this.ctx = canvas.getContext("2d");
+        }
+
+        Curve.prototype.render=function(){
+            this.A.map((a,i)=>{
+                this.ctx.strokeStyle = this.color[i]
+                this.ctx.fillStyle = this.color[i]
+                this.ctx.beginPath()
+                this.ctx.lineTo(0,this.height)
+                for(let x=0;x<this.width;x++){
+                    this.ctx.lineTo(x,this.getPoint(x,a,this.B[i],this.index[i])+this.height/2);
+                }
+                this.ctx.lineTo(this.width,this.height)
+                this.ctx.fill()
+                this.ctx.stroke();
+            })
+        }
+        
+        Curve.prototype.getPoint=function(x,A,B,index){
+            return A* Math.sin(x*B+index)+this.C
+        }
+        
+        Curve.prototype.move=function(){
+            this.index.map((item,i)=>{
+                this.index[i]+=this.speed[i]*this.direction
+            })
+        }
+
+        Curve.prototype.update = function(){
+            requestAnimationFrame(()=>{
+                this.ctx.clearRect(0,0,this.width,this.height);
+                this.move()
+                this.render()
+                this.update()
+            })
+        }
+        new Curve({
+            ctxId:"ctx",
+            width:200,
+            height:200,
+            color:["#3dd0ff","#3aa0ff"],
+            speed:[0.03,0.02],//速度
+            direction:-1,//方向
+            index:[0,20],//移动的距离
+            A:[7,6],//A越大波峰越大
+            B:[1/20,1/20],//B越小，周期越长
+        })
+    </script>
+</body>
+</html>
